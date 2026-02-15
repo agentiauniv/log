@@ -6,13 +6,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST["email"]);
     $password_input = trim($_POST["password"]);
 
-    // 🔹 CONFIGURATION SUPABASE
     $project_url = "https://uhqqzlpaybcyxrepisgi.supabase.co";
-    $api_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVocXF6bHBheWJjeXhyZXBpc2dpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NDAyNzgsImV4cCI6MjA4NjQxNjI3OH0.LNQMIQs7euI7-4MMJWU_maqT6WdXq6lWuueCtF3kE24"; // ⚠️ Mets ta vraie clé anon ici
+    $api_key = "sb_publishable_8zJ55HCmtuFhw1ClkAed2g_NdQ1GNqZ"; // Mets ta vraie clé anon
 
-    // 🔹 Requête par email uniquement
     $url = $project_url . "/rest/v1/login?select=*";
-
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -24,37 +21,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     ]);
 
     $response = curl_exec($ch);
-
-    if (curl_errno($ch)) {
-        echo "Erreur CURL : " . curl_error($ch);
-        exit;
-    }
-
     curl_close($ch);
-
-    // 🔎 AFFICHER LA REPONSE BRUTE (DEBUG)
-    echo "<h3>Réponse brute Supabase :</h3>";
-    echo "<pre>";
-    print_r($response);
-    echo "</pre>";
 
     $data = json_decode($response, true);
 
-    if (!empty($data)) {
+    foreach ($data as $user) {
 
-        $password_db = trim($data[0]["password"]);
+        $email_db = trim(str_replace(["\n", "\r"], '', $user["email"]));
+        $password_db = trim(str_replace(["\n", "\r"], '', $user["password"]));
 
-        if ($password_input === $password_db) {
+        if ($email_db === $email && $password_db === $password_input) {
 
-            $matricule = $data[0]["Matricule"];
-            $message = "✅ Connexion réussie ! Matricule : " . htmlspecialchars($matricule);
-
+            $message = "✅ Connexion réussie ! Matricule : " . htmlspecialchars($user["Matricule"]);
+            break;
         } else {
-            $message = "❌ Mot de passe incorrect.";
+            $message = "❌ Email ou mot de passe incorrect.";
         }
-
-    } else {
-        $message = "❌ Email introuvable.";
     }
 }
 ?>
@@ -86,4 +68,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 </body>
 </html>
-
