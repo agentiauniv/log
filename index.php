@@ -6,22 +6,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST["email"];
     $password = $_POST["password"];
 
-    // Email et mot de passe corrects (à changer si tu veux)
-    $correct_email = "admin@gmail.com";
-    $correct_password = "123456";
+    $supabase_url = getenv("SUPABASE_URL");
+    $supabase_key = getenv("SUPABASE_KEY");
 
-    if ($email === $correct_email && $password === $correct_password) {
-        $message = "✅ Connexion réussie !";
+    $url = $supabase_url . "/rest/v1/Login?email=eq." . urlencode($email) . "&password=eq." . urlencode($password);
+
+    $headers = [
+        "apikey: $supabase_key",
+        "Authorization: Bearer $supabase_key",
+        "Content-Type: application/json"
+    ];
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        $message = "Erreur connexion serveur.";
     } else {
-        $message = "❌ Email ou mot de passe incorrect.";
+        $data = json_decode($response, true);
+
+        if (!empty($data)) {
+            $message = "✅ Connexion réussie !";
+        } else {
+            $message = "❌ Email ou mot de passe incorrect.";
+        }
     }
+
+    curl_close($ch);
 }
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login</title>
+    <title>Login Supabase</title>
 </head>
 <body>
 
