@@ -3,19 +3,23 @@ $message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    $email = $_POST["email"];
-    $password = $_POST["password"];
+    $email = trim($_POST["email"]);
+    $password = trim($_POST["password"]);
 
     // 🔹 CONFIGURATION SUPABASE
     $project_url = "https://uhqqzlpaybcyxrepisgi.supabase.co";
-    $service_role_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVocXF6bHBheWJjeXhyZXBpc2dpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NDAyNzgsImV4cCI6MjA4NjQxNjI3OH0.LNQMIQs7euI7-4MMJWU_maqT6WdXq6lWuueCtF3kE24";
+    $service_role_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVocXF6bHBheWJjeXhyZXBpc2dpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDg0MDI3OCwiZXhwIjoyMDg2NDE2Mjc4fQ.zgY2AsO71vrf5V1lWW0J35nUtut1qUvfvGTRAHFRz7Y
 
-    // 🔹 URL API (table Login)
-    $url = $project_url . "/rest/v1/Login?email=eq." . urlencode($email) . "&password=eq." . urlencode($password);
+"; // remplace si besoin
+
+    // 🔹 Construire URL API
+    $url = $project_url . "/rest/v1/Login?select=*&email=eq." 
+           . urlencode($email) . "&password=eq." 
+           . urlencode($password);
 
     // 🔹 Initialiser CURL
-    $ch = curl_init($url);
-
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         "apikey: $service_role_key",
@@ -25,9 +29,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $response = curl_exec($ch);
 
-    // 🔹 Vérifier erreur CURL
-    if ($response === false) {
-        $message = "❌ Erreur CURL: " . curl_error($ch);
+    if (curl_errno($ch)) {
+        $message = "❌ Erreur connexion serveur.";
     } else {
 
         $data = json_decode($response, true);
@@ -46,7 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login</title>
+    <title>Connexion</title>
 </head>
 <body>
 
