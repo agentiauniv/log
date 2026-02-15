@@ -6,12 +6,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST["email"]);
     $password_input = trim($_POST["password"]);
 
-    // 🔹 Configuration Supabase
+    // 🔹 CONFIGURATION SUPABASE
     $project_url = "https://uhqqzlpaybcyxrepisgi.supabase.co";
-    $api_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVocXF6bHBheWJjeXhyZXBpc2dpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDg0MDI3OCwiZXhwIjoyMDg2NDE2Mjc4fQ.zgY2AsO71vrf5V1lWW0J35nUtut1qUvfvGTRAHFRz7Y
-"; // ⚠️ Remplace par ta vraie clé anon publique
+    $api_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVocXF6bHBheWJjeXhyZXBpc2dpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NDAyNzgsImV4cCI6MjA4NjQxNjI3OH0.LNQMIQs7euI7-4MMJWU_maqT6WdXq6lWuueCtF3kE24"; // ⚠️ Mets ta vraie clé anon ici
 
-    // 🔹 Requête : chercher par email uniquement
+    // 🔹 Requête par email uniquement
     $url = $project_url . "/rest/v1/login?select=*&email=eq." . urlencode($email);
 
     $ch = curl_init();
@@ -24,7 +23,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     ]);
 
     $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        echo "Erreur CURL : " . curl_error($ch);
+        exit;
+    }
+
     curl_close($ch);
+
+    // 🔎 AFFICHER LA REPONSE BRUTE (DEBUG)
+    echo "<h3>Réponse brute Supabase :</h3>";
+    echo "<pre>";
+    print_r($response);
+    echo "</pre>";
 
     $data = json_decode($response, true);
 
@@ -35,8 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($password_input === $password_db) {
 
             $matricule = $data[0]["Matricule"];
-
-            $message = "✅ Connexion réussie !<br>Matricule : " . htmlspecialchars($matricule);
+            $message = "✅ Connexion réussie ! Matricule : " . htmlspecialchars($matricule);
 
         } else {
             $message = "❌ Mot de passe incorrect.";
