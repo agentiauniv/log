@@ -6,14 +6,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST["email"]);
     $password_input = trim($_POST["password"]);
 
+    // 🔹 Configuration Supabase
     $project_url = "https://uhqqzlpaybcyxrepisgi.supabase.co";
     $api_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVocXF6bHBheWJjeXhyZXBpc2dpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDg0MDI3OCwiZXhwIjoyMDg2NDE2Mjc4fQ.zgY2AsO71vrf5V1lWW0J35nUtut1qUvfvGTRAHFRz7Y
+"; // ⚠️ Remplace par ta vraie clé anon publique
 
-
-"; // garde celle que tu utilises
-
-    // 🔹 chercher uniquement par email
-    $url = $project_url . "/rest/v1/Login?select=*&email=eq." . urlencode($email);
+    // 🔹 Requête : chercher par email uniquement
+    $url = $project_url . "/rest/v1/login?select=*&email=eq." . urlencode($email);
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -31,10 +30,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (!empty($data)) {
 
-        $password_db = $data[0]["password"];
+        $password_db = trim($data[0]["password"]);
 
         if ($password_input === $password_db) {
-            $message = "✅ Connexion réussie !";
+
+            $matricule = $data[0]["Matricule"];
+
+            $message = "✅ Connexion réussie !<br>Matricule : " . htmlspecialchars($matricule);
+
         } else {
             $message = "❌ Mot de passe incorrect.";
         }
@@ -48,23 +51,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login</title>
+    <title>Connexion</title>
 </head>
 <body>
 
-<h2>Connexion</h2>
+<h1>Connexion</h1>
 
 <form method="POST">
-    Email:<br>
+    <label>Email :</label><br>
     <input type="email" name="email" required><br><br>
 
-    Mot de passe:<br>
+    <label>Mot de passe :</label><br>
     <input type="password" name="password" required><br><br>
 
     <button type="submit">Se connecter</button>
 </form>
 
-<p><?php echo $message; ?></p>
+<br>
+
+<div>
+    <?php echo $message; ?>
+</div>
 
 </body>
 </html>
