@@ -6,27 +6,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST["email"];
     $password = $_POST["password"];
 
-    $supabase_url = getenv("SUPABASE_URL");
-    $supabase_key = getenv("SUPABASE_KEY");
+    // 🔹 CONFIGURATION SUPABASE
+    $project_url = "https://uhqqzlpaybcyxrepisgi.supabase.co";
+    $service_role_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVocXF6bHBheWJjeXhyZXBpc2dpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NDAyNzgsImV4cCI6MjA4NjQxNjI3OH0.LNQMIQs7euI7-4MMJWU_maqT6WdXq6lWuueCtF3kE24";
 
-    $url = $supabase_url . "/rest/v1/Login?email=eq." . urlencode($email) . "&password=eq." . urlencode($password);
+    // 🔹 URL API (table Login)
+    $url = $project_url . "/rest/v1/Login?email=eq." . urlencode($email) . "&password=eq." . urlencode($password);
 
-    $headers = [
-        "apikey: $supabase_key",
-        "Authorization: Bearer $supabase_key",
-        "Content-Type: application/json"
-    ];
+    // 🔹 Initialiser CURL
+    $ch = curl_init($url);
 
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "apikey: $service_role_key",
+        "Authorization: Bearer $service_role_key",
+        "Content-Type: application/json"
+    ]);
 
     $response = curl_exec($ch);
 
-    if (curl_errno($ch)) {
-        $message = "Erreur connexion serveur.";
+    // 🔹 Vérifier erreur CURL
+    if ($response === false) {
+        $message = "❌ Erreur CURL: " . curl_error($ch);
     } else {
+
         $data = json_decode($response, true);
 
         if (!empty($data)) {
@@ -43,7 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login Supabase</title>
+    <title>Login</title>
 </head>
 <body>
 
